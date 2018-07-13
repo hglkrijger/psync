@@ -44,7 +44,7 @@ def new_session(secrets_config, is_pretend):
         logger.warn('expected session file not found [%s]', session_file)
 
 
-def load_session(secret_or_client):
+def load_session(secret_or_client, is_pretend):
     client_id = None
     if os.path.exists(secret_or_client):
         config = configparser.ConfigParser()
@@ -61,9 +61,16 @@ def load_session(secret_or_client):
         logger.error('client_id could not be determined')
         return
 
-    logger.info('loading session for app %s', client_id)
+    logger.info('loading session for app %s %s', client_id, '[dry-run]' if is_pretend else '')
 
     scopes = ['wl.signin', 'wl.offline_access', 'onedrive.readonly']
     client = onedrivesdk.get_default_client(client_id=client_id, scopes=scopes)
+
+    if is_pretend:
+        logger.info('refreshing token')
+        return
+
     client.auth_provider.load_session()
     client.auth_provider.refresh_token()
+
+    logger.info('token refreshed')

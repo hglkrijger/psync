@@ -48,7 +48,7 @@ def main(args=None):
         new_session(args.new_session[0], args.pretend)
 
     if args.load_session is not None:
-        load_session(args.load_session[0])
+        load_session(args.load_session[0], args.pretend)
 
 
 if __name__ == "__main__":
