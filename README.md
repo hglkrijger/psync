@@ -7,7 +7,7 @@ Tools for PiWiGo
 git clone git@github.com:hglkrijger/psync.git
 cd psync
 pip install -r requirements.txt
-python setup.py install
+sudo python setup.py install
 ```
 
 ## Usage
@@ -20,8 +20,10 @@ python psync --help
 
 ### Generating a OneDrive session
 
+This requires a browser with JavaScript support.
+
 ```bash
-python psync --new-session secrets\secrets.ini
+sudo python psync --new-session secrets/secrets.ini
 ```
 
 ### Running filename cleanup
