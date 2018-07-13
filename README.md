@@ -3,6 +3,8 @@ Tools for PiWiGo
 
 ## Installation
 
+Replace `python` and `pip` with `python3` and `pip3` as appropriate. 
+
 ```bash
 git clone https://github.com/hglkrijger/psync.git
 cd psync
@@ -27,6 +29,8 @@ sudo python psync --new-session secrets/secrets.ini
 ```
 
 ### Loading an existing session
+
+Ensure the same version of Python is used to generate and load the session.
 
 ```bash
 python psync --load-session secrets/secrets.ini
