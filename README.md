@@ -4,9 +4,9 @@ Tools for PiWiGo
 ## Installation
 
 ```bash
-git clone git@github.com:hglkrijger/psync.git
+git clone https://github.com/hglkrijger/psync.git
 cd psync
-pip install -r requirements.txt
+sudo pip install -r requirements.txt
 sudo python setup.py install
 ```
 
@@ -24,6 +24,16 @@ This requires a browser with JavaScript support.
 
 ```bash
 sudo python psync --new-session secrets/secrets.ini
+```
+
+### Loading an existing session
+
+```bash
+python psync --load-session secrets/secrets.ini
+```
+or
+```bash
+python psync --load-session app_id
 ```
 
 ### Running filename cleanup

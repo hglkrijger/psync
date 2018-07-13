@@ -1,5 +1,7 @@
 import os
 import logging
+from uuid import UUID
+
 import onedrivesdk
 from onedrivesdk.helpers import GetAuthCodeServer
 import configparser
@@ -40,3 +42,28 @@ def new_session(secrets_config, is_pretend):
         logger.info('session saved to %s', session_file)
     else:
         logger.warn('expected session file not found [%s]', session_file)
+
+
+def load_session(secret_or_client):
+    client_id = None
+    if os.path.exists(secret_or_client):
+        config = configparser.ConfigParser()
+        config.read(secret_or_client)
+        client_id = config['default']['client_id']
+    else:
+        try:
+            UUID(secret_or_client, version=4)
+            client_id = secret_or_client
+        except ValueError:
+            pass
+
+    if client_id is None:
+        logger.error('client_id could not be determined')
+        return
+
+    logger.info('loading session for app %s', client_id)
+
+    scopes = ['wl.signin', 'wl.offline_access', 'onedrive.readonly']
+    client = onedrivesdk.get_default_client(client_id=client_id, scopes=scopes)
+    client.auth_provider.load_session()
+    client.auth_provider.refresh_token()
