@@ -108,4 +108,5 @@ venv.bak/
 
 # secrets
 secrets/*.pfx
-secrets/*.conf
+secrets/*.ini
+*.pickle
