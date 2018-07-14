@@ -58,6 +58,7 @@ class ServiceInstall(install):
         if run_systemctl:
             self.exec_cmd('systemctl daemon-reload')
             self.exec_cmd('systemctl enable psync.service')
+            self.exec_cmd('systemctl start psync.service')
 
 
 setup(name='psync',
