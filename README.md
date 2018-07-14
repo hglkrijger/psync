@@ -28,16 +28,16 @@ This requires a browser with JavaScript support.
 sudo python psync --new-session secrets/secrets.ini
 ```
 
-### Loading an existing session
+### Refreshing an existing session
 
-Ensure the same version of Python is used to generate and load the session.
+Ensure the same version of Python is used to generate and refresh the session.
 
 ```bash
-python psync --load-session secrets/secrets.ini
+python psync --refresh-session secrets/secrets.ini
 ```
 or
 ```bash
-python psync --load-session app_id
+python psync --refresh-session app_id
 ```
 
 ### Running filename cleanup

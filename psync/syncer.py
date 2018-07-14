@@ -44,7 +44,7 @@ def new_session(secrets_config, is_pretend):
         logger.warn('expected session file not found [%s]', session_file)
 
 
-def load_session(secret_or_client, is_pretend):
+def refresh_session(secret_or_client, is_pretend):
     client_id = None
     if os.path.exists(secret_or_client):
         config = configparser.ConfigParser()
