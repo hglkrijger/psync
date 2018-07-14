@@ -3,13 +3,23 @@ Tools for PiWiGo
 
 ## Installation
 
-Replace `python` and `pip` with `python3` and `pip3` as appropriate. 
-
 ```bash
 git clone https://github.com/hglkrijger/psync.git
 cd psync
-sudo pip install -r requirements.txt
-sudo python setup.py install
+pip3 install -r requirements.txt
+python3 setup.py install
+```
+
+### Service management
+
+```bash
+less /usr/sbin/psync
+less /lib/systemd/system/psync.service
+systemctl daemon-reload
+systemctl enable psync.service
+systemctl start psync.service
+systemctl stop psync.service
+systemctl disable psync.service
 ```
 
 ## Usage
@@ -17,7 +27,7 @@ sudo python setup.py install
 ### Help
 
 ```bash
-python psync --help
+python3 psync --help
 ```
 
 ### Generating a OneDrive session
@@ -25,7 +35,7 @@ python psync --help
 This requires a browser with JavaScript support.
 
 ```bash
-sudo python psync --new-session secrets/secrets.ini
+python3 psync --new-session secrets/secrets.ini
 ```
 
 ### Refreshing an existing session
@@ -33,11 +43,11 @@ sudo python psync --new-session secrets/secrets.ini
 Ensure the same version of Python is used to generate and refresh the session.
 
 ```bash
-python psync --refresh-session secrets/secrets.ini
+python3 psync --refresh-session secrets/secrets.ini
 ```
 or
 ```bash
-python psync --refresh-session app_id
+python3 psync --refresh-session app_id
 ```
 
 ### Running filename cleanup
