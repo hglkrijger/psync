@@ -17,16 +17,13 @@ class Daemon(object):
         return self.is_running
 
     def __init__(self):
-        self.is_running = True
-        self.interval = 5
-
         logger.info('creating daemon')
-        thread = threading.Thread(target=self.run)
-        thread.daemon = True
-        thread.start()
+        self.interval = 5
+        self.is_running = False
 
     def run(self):
-        while self.is_running:
+        self.is_running = True
+        while self.is_alive:
             logger.info('daemon running')
             sleep(self.interval)
 
