@@ -1,0 +1,11 @@
+[Unit]
+Description=psync service
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/sbin/psync
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
