@@ -36,7 +36,7 @@ class ServiceInstall(install):
             dst = os.path.join(dest_path, service_file)
             print('copy {0} to {1}'.format(psync_service, dst))
             shutil.copy(psync_service, dst)
-            os.chmod(dst, 0x0664)
+            os.chmod(dst, 0o664)
 
         print('creating runner')
         exec_file = 'psync'
@@ -53,6 +53,7 @@ class ServiceInstall(install):
             dst = os.path.join(dest_path, exec_file)
             print('copy {0} to {1}'.format(psync_exec, dst))
             shutil.copy(psync_exec, dst)
+            os.chmod(dst, 0o755)
             os.chmod(dst, stat.S_IEXEC)
 
         if run_systemctl:
