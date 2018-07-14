@@ -11,7 +11,7 @@ class ServiceInstall(install):
     @staticmethod
     def exec_cmd(cmd):
         try:
-            subprocess.Popen(cmd.split(' '), shell=True, stderr=subprocess.STDOUT)
+            subprocess.check_output(cmd.split(' '))
             print(cmd)
         except subprocess.CalledProcessError as e:
             print('could not execute {0}: {1} {2}'.format(cmd, e.returncode, e.output))
