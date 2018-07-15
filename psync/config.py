@@ -42,3 +42,7 @@ class Configuration(object):
     @property
     def client_id(self):
         return self.config['secrets']['client_id']
+
+    @property
+    def session_file(self):
+        return self.config['secrets']['session_file']

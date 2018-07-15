@@ -7,7 +7,6 @@ from onedrivesdk.helpers import GetAuthCodeServer
 from psync.config import Configuration
 
 logger = logging.getLogger(__name__)
-session_file = 'session.pickle'
 scopes = ['wl.signin', 'wl.offline_access', 'onedrive.readwrite']
 
 
@@ -61,12 +60,12 @@ class Sync(object):
         logger.info('authenticating via the browser...')
         code = GetAuthCodeServer.get_auth_code(auth_url, redirect_uri)
         client.auth_provider.authenticate(code, redirect_uri, client_secret)
-        client.auth_provider.save_session()
+        client.auth_provider.save_session(path=self.config.session_file)
 
-        if os.path.exists(session_file):
-            logger.info('session saved to %s', session_file)
+        if os.path.exists(self.config.session_file):
+            logger.info('session saved to %s', self.config.session_file)
         else:
-            logger.warn('expected session file not found [%s]', session_file)
+            logger.warn('expected session file not found [%s]', self.config.session_file)
 
     def refresh_session(self):
         client_id = self.config.client_id
@@ -74,7 +73,7 @@ class Sync(object):
         logger.info('loading session for app %s %s', client_id, '[dry-run]' if self.is_pretend else '')
         client = onedrivesdk.get_default_client(client_id=client_id, scopes=scopes)
 
-        client.auth_provider.load_session()
+        client.auth_provider.load_session(path=self.config.session_file)
         client.auth_provider.refresh_token()
 
         logger.info('token refreshed')
