@@ -30,6 +30,14 @@ systemctl disable psync.service
 python3 psync --help
 ```
 
+### Logging levels
+```bat
+SET LOGLEVEL=DEBUG
+```
+```bash
+LOGLEVEL='DEBUG'
+```
+
 ### Generating a OneDrive session
 
 This requires a browser with JavaScript support.

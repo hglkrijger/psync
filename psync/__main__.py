@@ -4,7 +4,7 @@ import argparse
 import logging
 
 from psync.cleaner import clean
-from psync.syncer import new_session, refresh_session
+from psync.syncer import new_session, refresh_session, Sync
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"),
@@ -16,6 +16,10 @@ def main(args=None):
         args = sys.argv[1:]
 
     parser = argparse.ArgumentParser(description='Import, clean and sync images with PiWiGo.')
+    parser.add_argument('--sync',
+                        action='store_true',
+                        help='run sync')
+
     parser.add_argument('--clean',
                         nargs=1,
                         metavar='folder',
@@ -41,14 +45,17 @@ def main(args=None):
 
     args = parser.parse_args()
 
-    if args.clean is not None:
-        clean(args.clean[0], args.pretend)
-
     if args.new_session is not None:
         new_session(args.new_session[0], args.pretend)
 
     if args.refresh_session is not None:
         refresh_session(args.refresh_session[0], args.pretend)
+
+    if args.sync:
+        Sync(args.pretend).run()
+
+    if args.clean is not None:
+        clean(args.clean[0], args.pretend)
 
 
 if __name__ == "__main__":

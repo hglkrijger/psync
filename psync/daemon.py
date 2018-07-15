@@ -1,7 +1,10 @@
 import os
-import threading
 import logging
 from time import sleep
+
+import configparser
+
+from psync.syncer import Sync
 
 log_location = '/var/log' if os.path.exists('/var/log') else ''
 logger = logging.getLogger(__name__)
@@ -18,14 +21,17 @@ class Daemon(object):
 
     def __init__(self):
         logger.info('creating daemon')
-        self.interval = 5
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        self.interval = config.getint('default', 'sync_interval')
         self.is_running = False
+        self.sync = Sync(is_pretend=False)
 
     def run(self):
         self.is_running = True
         while self.is_alive:
-            logger.info('daemon running')
-            sleep(self.interval)
+            self.sync.run()
+            sleep(self.interval * 60)
 
     def stop(self):
         logger.info('stopping daemon')
