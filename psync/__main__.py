@@ -4,7 +4,7 @@ import argparse
 import logging
 
 from psync.cleaner import clean
-from psync.syncer import new_session, refresh_session, Sync
+from psync.syncer import Sync
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"),
@@ -27,16 +27,12 @@ def main(args=None):
                         help='clean directory and filenames')
 
     parser.add_argument('--new-session',
-                        nargs=1,
-                        metavar='secrets.ini',
-                        action='store',
-                        help='create a new session with the specified secrets.ini')
+                        action='store_true',
+                        help='create and save a new session')
 
     parser.add_argument('--refresh-session',
-                        nargs=1,
-                        metavar='secrets.ini|app_id',
-                        action='store',
-                        help='load an existing session from the default session file and refresh the token')
+                        action='store_true',
+                        help='load an existing session and refresh the token')
 
     parser.add_argument('--pretend',
                         action='store_true',
@@ -45,14 +41,16 @@ def main(args=None):
 
     args = parser.parse_args()
 
-    if args.new_session is not None:
-        new_session(args.new_session[0], args.pretend)
+    sync = Sync(args.pretend)
 
-    if args.refresh_session is not None:
-        refresh_session(args.refresh_session[0], args.pretend)
+    if args.new_session:
+        sync.new_session()
+
+    if args.refresh_session:
+        sync.refresh_session()
 
     if args.sync:
-        Sync(args.pretend).run()
+        sync.run()
 
     if args.clean is not None:
         clean(args.clean[0], args.pretend)

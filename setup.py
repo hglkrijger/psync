@@ -56,6 +56,16 @@ class ServiceInstall(install):
             os.chmod(dst, 0o755)
             os.chmod(dst, stat.S_IEXEC)
 
+        print('creating config')
+        config_file = 'psync.conf'
+        dest_path = '/etc'
+        if not os.path.exists(dest_path):
+            print('{0} not found, will not copy config file'.format(dest_path))
+        else:
+            dst = os.path.join(dest_path, config_file)
+            print('copy {0} to {1}'.format(config_file, dst))
+            shutil.copy(config_file, dst)
+
         if run_systemctl:
             self.exec_cmd('systemctl daemon-reload')
             self.exec_cmd('systemctl enable psync.service')

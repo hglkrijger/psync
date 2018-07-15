@@ -2,8 +2,7 @@ import os
 import logging
 from time import sleep
 
-import configparser
-
+from psync.config import Configuration
 from psync.syncer import Sync
 
 log_location = '/var/log' if os.path.exists('/var/log') else ''
@@ -21,9 +20,7 @@ class Daemon(object):
 
     def __init__(self):
         logger.info('creating daemon')
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        self.interval = config.getint('default', 'sync_interval')
+        self.interval = Configuration().sync_interval
         self.is_running = False
         self.sync = Sync(is_pretend=False)
 

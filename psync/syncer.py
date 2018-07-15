@@ -1,95 +1,28 @@
 import datetime
 import os
 import logging
-
-import configparser
 import onedrivesdk
+
 from onedrivesdk.helpers import GetAuthCodeServer
-from uuid import UUID
+from psync.config import Configuration
 
 logger = logging.getLogger(__name__)
 session_file = 'session.pickle'
 scopes = ['wl.signin', 'wl.offline_access', 'onedrive.readwrite']
 
 
-def new_session(secrets_config, is_pretend):
-    if not os.path.exists(secrets_config):
-        logger.error('%s does not exist', secrets_config)
-        return
-
-    logger.info('new session, loading %s %s', secrets_config, '[dry-run]' if is_pretend else '')
-
-    config = configparser.ConfigParser()
-    config.read(secrets_config)
-
-    redirect_uri = config['default']['redirect_uri']
-    client_secret = config['default']['client_secret']
-    client_id = config['default']['client_id']
-
-    logger.info('loaded secrets successfully')
-
-    if is_pretend:
-        logger.info('authenticate app %s at %s', client_id, redirect_uri)
-        return
-
-    client = onedrivesdk.get_default_client(client_id=client_id, scopes=scopes)
-    auth_url = client.auth_provider.get_auth_url(redirect_uri)
-    logger.info('authenticating via the browser...')
-    code = GetAuthCodeServer.get_auth_code(auth_url, redirect_uri)
-    client.auth_provider.authenticate(code, redirect_uri, client_secret)
-    client.auth_provider.save_session()
-
-    if os.path.exists(session_file):
-        logger.info('session saved to %s', session_file)
-    else:
-        logger.warn('expected session file not found [%s]', session_file)
-
-
-def refresh_session(secret_or_client, is_pretend):
-    client_id = None
-    if os.path.exists(secret_or_client):
-        config = configparser.ConfigParser()
-        config.read(secret_or_client)
-        client_id = config['default']['client_id']
-    else:
-        try:
-            UUID(secret_or_client, version=4)
-            client_id = secret_or_client
-        except ValueError:
-            pass
-
-    if client_id is None:
-        logger.error('client_id could not be determined')
-        return
-
-    logger.info('loading session for app %s %s', client_id, '[dry-run]' if is_pretend else '')
-    client = onedrivesdk.get_default_client(client_id=client_id, scopes=scopes)
-
-    if is_pretend:
-        logger.info('refreshing token')
-        return
-
-    client.auth_provider.load_session()
-    client.auth_provider.refresh_token()
-
-    logger.info('token refreshed')
-
-    return client
-
-
 class Sync(object):
 
     def __init__(self, is_pretend):
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        secrets_path = config['default']['secrets_path']
-        self.sync_src = config['default']['sync_src']
-        self.sync_dst = config['default']['sync_dst']
-        self.client = refresh_session(secrets_path, is_pretend=False)
+        self.config = Configuration()
         self.is_pretend = is_pretend
+        self.sync_src = self.config.sync_src
+        self.sync_dst = self.config.sync_dst
+        self.client = None
 
     def run(self):
         logger.debug('sync running')
+        self.client = self.refresh_session()
         src_id = self.find_id(self.sync_src)
         src_items = self.list_all(src_id)
         logger.debug('sync {0} items to {1}'.format(len(src_items), self.sync_dst))
@@ -111,6 +44,42 @@ class Sync(object):
                 self.delete(src_item.id)
 
         logger.debug('sync completed')
+
+    def new_session(self):
+        redirect_uri = self.config.redirect_uri
+        client_secret = self.config.client_secret
+        client_id = self.config.client_id
+
+        logger.info('loaded secrets successfully')
+
+        if self.is_pretend:
+            logger.info('authenticate app %s at %s', client_id, redirect_uri)
+            return
+
+        client = onedrivesdk.get_default_client(client_id=client_id, scopes=scopes)
+        auth_url = client.auth_provider.get_auth_url(redirect_uri)
+        logger.info('authenticating via the browser...')
+        code = GetAuthCodeServer.get_auth_code(auth_url, redirect_uri)
+        client.auth_provider.authenticate(code, redirect_uri, client_secret)
+        client.auth_provider.save_session()
+
+        if os.path.exists(session_file):
+            logger.info('session saved to %s', session_file)
+        else:
+            logger.warn('expected session file not found [%s]', session_file)
+
+    def refresh_session(self):
+        client_id = self.config.client_id
+
+        logger.info('loading session for app %s %s', client_id, '[dry-run]' if self.is_pretend else '')
+        client = onedrivesdk.get_default_client(client_id=client_id, scopes=scopes)
+
+        client.auth_provider.load_session()
+        client.auth_provider.refresh_token()
+
+        logger.info('token refreshed')
+
+        return client
 
     @staticmethod
     def list_files(path):

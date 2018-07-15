@@ -7,8 +7,24 @@ Tools for PiWiGo
 git clone https://github.com/hglkrijger/psync.git
 cd psync
 pip3 install -r requirements.txt
+[add secrets to psync.conf, see below]
 python3 setup.py install
 ```
+
+## Configuration
+
+To sync with OneDrive, update `psync.conf` with the following structure:
+
+```yml
+[secrets]
+client_id: application_id
+client_secret: secret
+redirect_uri: uri
+``` 
+
+These values should be obtained by registering an application at [https://apps.dev.microsoft.com](https://apps.dev.microsoft.com). 
+
+More information at [https://developer.microsoft.com/en-us/graph/quick-start](https://developer.microsoft.com/en-us/graph/quick-start).
 
 ### Service management
 
@@ -31,9 +47,6 @@ python3 psync --help
 ```
 
 ### Logging levels
-```bat
-SET LOGLEVEL=DEBUG
-```
 ```bash
 LOGLEVEL='DEBUG'
 ```
@@ -43,7 +56,7 @@ LOGLEVEL='DEBUG'
 This requires a browser with JavaScript support.
 
 ```bash
-python3 psync --new-session secrets/secrets.ini
+python3 psync --new-session
 ```
 
 ### Refreshing an existing session
@@ -51,11 +64,15 @@ python3 psync --new-session secrets/secrets.ini
 Ensure the same version of Python is used to generate and refresh the session.
 
 ```bash
-python3 psync --refresh-session secrets/secrets.ini
+python3 psync --refresh-session
 ```
-or
+
+### Syncing with OneDrive
+
+Ensure the configuration values are set appropriately.
+
 ```bash
-python3 psync --refresh-session app_id
+python3 psync --sync
 ```
 
 ### Running filename cleanup
