@@ -28,6 +28,10 @@ class Configuration(object):
         return self.config['default']['sync_src']
 
     @property
+    def owner(self):
+        return self.config['default']['owner']
+
+    @property
     def sync_dst(self):
         return self.config['default']['sync_dst']
 

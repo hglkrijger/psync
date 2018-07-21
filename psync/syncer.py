@@ -6,6 +6,8 @@ import onedrivesdk
 from onedrivesdk.helpers import GetAuthCodeServer
 from psync.config import Configuration
 
+from pwd import getpwnam
+
 logger = logging.getLogger(__name__)
 scopes = ['wl.signin', 'wl.offline_access', 'onedrive.readwrite']
 
@@ -18,6 +20,10 @@ class Sync(object):
         self.sync_src = self.config.sync_src
         self.sync_dst = self.config.sync_dst
         self.client = None
+
+        pw = getpwnam(self.config.owner)
+        self.uid = pw.pw_uid
+        self.gid = pw.pw_gid
 
     def run(self):
         logger.debug('sync running')
@@ -138,12 +144,17 @@ class Sync(object):
         if not os.path.exists(folder) and not self.is_pretend:
             logger.info('creating {0}'.format(folder))
             os.makedirs(folder)
+            os.chmod(folder, 0o755)
+            os.chown(folder, self.uid, self.gid)
         if os.path.exists(os.path.join(folder, item_name)):
             logger.debug('{0} already exists, skipping'.format(item_name))
             return
         logger.info('download {0} to {1}'.format(item_name, folder))
         if not self.is_pretend:
-            self.client.item(id=item_id).download(os.path.join(folder, item_name))
+            full_path = os.path.join(folder, item_name)
+            self.client.item(id=item_id).download(full_path)
+            os.chmod(full_path, 0o644)
+            os.chown(full_path, self.uid, self.gid)
 
     def delete(self, item_id):
         if not self.is_pretend:
