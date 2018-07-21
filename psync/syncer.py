@@ -1,3 +1,5 @@
+import shutil
+
 import datetime
 import os
 import logging
@@ -141,26 +143,28 @@ class Sync(object):
             logger.info('[{:23}] {}{}'.format(i.id, i.name, '' if i.folder is None else '/'))
 
     def download(self, item_id, item_name, folder):
+        full_path = os.path.join(folder, item_name)
         if not os.path.exists(folder) and not self.is_pretend:
             logger.info('creating {0}'.format(folder))
             os.makedirs(folder)
             os.chmod(folder, 0o755)
             os.chown(folder, self.uid, self.gid)
-        if os.path.exists(os.path.join(folder, item_name)):
+        if os.path.exists(full_path):
             logger.debug('{0} already exists, skipping'.format(item_name))
             return
-        logger.info('download {0} to {1}'.format(item_name, folder))
+        # move previously synced file if it exists
+        orig = os.path.join(self.sync_dst, item_name)
+        if os.path.exists(orig):
+            logger.warn("{0} exists, moving".format(orig))
+            if not self.is_pretend:
+                shutil.move(orig, full_path)
+        else:
+            logger.info('download {0} to {1}'.format(item_name, folder))
+            if not self.is_pretend:
+                self.client.item(id=item_id).download(full_path)
         if not self.is_pretend:
-            full_path = os.path.join(folder, item_name)
-            self.client.item(id=item_id).download(full_path)
             os.chmod(full_path, 0o644)
             os.chown(full_path, self.uid, self.gid)
-
-            # remove previous syncs
-            orig = os.path.join(self.sync_dst, item_name)
-            if os.path.exists(orig):
-                logger.warn("removing {0}".format(orig))
-                os.remove(orig)
 
     def delete(self, item_id):
         if not self.is_pretend:
