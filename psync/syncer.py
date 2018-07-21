@@ -146,8 +146,7 @@ class Sync(object):
         full_path = os.path.join(folder, item_name)
         if not os.path.exists(folder) and not self.is_pretend:
             logger.info('creating {0}'.format(folder))
-            os.makedirs(folder)
-            os.chmod(folder, 0o755)
+            os.makedirs(folder, 0o755)
             os.chown(folder, self.uid, self.gid)
         if os.path.exists(full_path):
             logger.debug('{0} already exists, skipping'.format(item_name))
