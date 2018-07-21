@@ -156,6 +156,12 @@ class Sync(object):
             os.chmod(full_path, 0o644)
             os.chown(full_path, self.uid, self.gid)
 
+            # remove previous syncs
+            orig = os.path.join(self.sync_dst, item_name)
+            if os.path.exists(orig):
+                logger.warn("removing {0}".format(orig))
+                os.remove(orig)
+
     def delete(self, item_id):
         if not self.is_pretend:
             self.client.item(id=item_id).delete()
