@@ -1,3 +1,4 @@
+import ast
 import os
 import logging
 
@@ -17,23 +18,15 @@ class Configuration(object):
 
     @property
     def sync_interval(self):
-        return self.config.getint('default', 'sync_interval')
-
-    @property
-    def secrets_path(self):
-        return self.config['default']['secrets_path']
-
-    @property
-    def sync_src(self):
-        return self.config['default']['sync_src']
+        return self.config.getint('service', 'sync_interval')
 
     @property
     def owner(self):
-        return self.config['default']['owner']
+        return self.config['service']['owner']
 
     @property
-    def sync_dst(self):
-        return self.config['default']['sync_dst']
+    def accounts(self):
+        return ast.literal_eval(self.config['service']['accounts'])
 
     @property
     def redirect_uri(self):
@@ -47,6 +40,21 @@ class Configuration(object):
     def client_id(self):
         return self.config['secrets']['client_id']
 
-    @property
-    def session_file(self):
-        return self.config['secrets']['session_file']
+    def session_file(self, account):
+        if not self.config.has_section(account):
+            raise Exception('Account %s not defined', account)
+
+        return self.config[account]['session_file']
+
+    def sync_src(self, account):
+        if not self.config.has_section(account):
+            raise Exception('Account %s not defined', account)
+
+        return self.config[account]['sync_src']
+
+    def sync_dst(self, account):
+        if not self.config.has_section(account):
+            raise Exception('Account %s not defined', account)
+
+        return self.config[account]['sync_dst']
+

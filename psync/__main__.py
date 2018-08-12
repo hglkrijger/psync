@@ -27,11 +27,15 @@ def main(args=None):
                         help='clean directory and filenames')
 
     parser.add_argument('--new-session',
-                        action='store_true',
+                        nargs=1,
+                        metavar='account',
+                        action='store',
                         help='create and save a new session')
 
     parser.add_argument('--refresh-session',
-                        action='store_true',
+                        nargs=1,
+                        metavar='account',
+                        action='store',
                         help='load an existing session and refresh the token')
 
     parser.add_argument('--pretend',
@@ -44,10 +48,10 @@ def main(args=None):
     sync = Sync(args.pretend)
 
     if args.new_session:
-        sync.new_session()
+        sync.new_session(args.new_session[0])
 
     if args.refresh_session:
-        sync.refresh_session()
+        sync.refresh_session(args.refresh_session[0])
 
     if args.sync:
         sync.run()
