@@ -21,15 +21,6 @@ class Sync(object):
         self.accounts = self.config.accounts
         self.client = None
 
-        try:
-            from pwd import getpwnam
-            pw = getpwnam(self.config.owner)
-            self.uid = pw.pw_uid
-            self.gid = pw.pw_gid
-        except Exception:
-            self.uid = 0
-            self.gid = 0
-
     def run(self):
         for account in self.accounts:
             logger.debug('[{0}] sync running'.format(account))
@@ -52,7 +43,7 @@ class Sync(object):
                 month = src_item.created_date_time.strftime("%m")
                 day = src_item.created_date_time.strftime("%d")
                 full_path = os.path.join(dst, year, month, day)
-                self.download(src_item.id, src_item.name, full_path)
+                self.download(src_item.id, src_item.name, full_path, dst)
 
                 if datetime.datetime.utcnow() - src_item.created_date_time > datetime.timedelta(days=365):
                     logger.info('{0} is over a year old, removing..'.format(src_item.name))
@@ -155,17 +146,22 @@ class Sync(object):
         for i in items:
             logger.info('[{:23}] {}{}'.format(i.id, i.name, '' if i.folder is None else '/'))
 
-    def download(self, item_id, item_name, folder):
+    def download(self, item_id, item_name, folder, dst):
+        from pwd import getpwnam
+        pw = getpwnam(self.config.owner)
+        uid = pw.pw_uid
+        gid = pw.pw_gid
+
         full_path = os.path.join(folder, item_name)
         if not os.path.exists(folder) and not self.is_pretend:
             logger.info('creating {0}'.format(folder))
             os.makedirs(folder, 0o755)
-            os.chown(folder, self.uid, self.gid)
+            os.chown(folder, uid, gid)
         if os.path.exists(full_path):
             logger.debug('{0} already exists, skipping'.format(item_name))
             return
         # move previously synced file if it exists
-        orig = os.path.join(self.sync_dst, item_name)
+        orig = os.path.join(dst, item_name)
         if os.path.exists(orig):
             logger.warn("{0} exists, moving".format(orig))
             if not self.is_pretend:
@@ -176,7 +172,7 @@ class Sync(object):
                 self.client.item(id=item_id).download(full_path)
         if not self.is_pretend:
             os.chmod(full_path, 0o644)
-            os.chown(full_path, self.uid, self.gid)
+            os.chown(full_path, uid, gid)
 
     def delete(self, item_id):
         if not self.is_pretend:
