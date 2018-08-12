@@ -85,8 +85,9 @@ class Sync(object):
                     '[dry-run]' if self.is_pretend else '')
         client = onedrivesdk.get_default_client(client_id=client_id, scopes=scopes)
 
-        client.auth_provider.load_session(path=session_file)
-        client.auth_provider.refresh_token()
+        if not self.is_pretend:
+            client.auth_provider.load_session(path=session_file)
+            client.auth_provider.refresh_token()
 
         logger.info('token refreshed for %s', account)
 
