@@ -153,6 +153,9 @@ class Sync(object):
         uid = pw.pw_uid
         gid = pw.pw_gid
 
+        logger.debug('download item_id [{0}], item_name [{1}], folder [{2}], dst [{3}]'
+                     .format(item_id, item_name, folder, dst))
+
         full_path = os.path.join(folder, item_name)
         if not os.path.exists(folder) and not self.is_pretend:
             logger.info('creating {0}'.format(folder))
