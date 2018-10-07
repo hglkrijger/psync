@@ -30,7 +30,7 @@ class Sync(object):
             dst = self.config.sync_dst(account)
 
             src_id = self.find_id(src)
-            src_items = self.list_all(src_id)
+            src_items = self.list_all(src_id, recursive=True)
             logger.debug('sync {0} items to {1}'.format(len(src_items), dst))
             if not os.path.exists(dst):
                 logger.error('{0} does not exist'.format(dst))
@@ -100,7 +100,6 @@ class Sync(object):
             for filename in files:
                 file_path = os.path.join(root, filename)
                 items.append(file_path)
-                logger.debug(file_path)
         return items
 
     def find_id(self, path, item_id='root'):
@@ -129,16 +128,25 @@ class Sync(object):
     def first(self, item_id):
         return self.client.item(id=item_id).children.request(top=100).get()
 
-    def list_all(self, item_id):
+    def list_all(self, item_id, recursive=False):
         all_items = []
+        logger.debug('list_all [{0}] {1}'.format(item_id, '[recursive]' if recursive else ''))
         items = self.first(item_id)
         for i in items:
-            all_items.append(i)
+            if recursive and i.folder is not None:
+                for child in self.list_all(i.id, recursive=True):
+                    all_items.append(child)
+            else:
+                all_items.append(i)
         while items is not None:
             items = self.next(items)
             if items is not None:
                 for i in items:
-                    all_items.append(i)
+                    if recursive and i.folder is not None:
+                        for child in self.list_all(i.id, recursive=True):
+                            all_items.append(child)
+                    else:
+                        all_items.append(i)
         logger.debug('{0} items found in {1}'.format(len(all_items), item_id))
         return all_items
 
